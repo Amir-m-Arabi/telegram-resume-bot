@@ -133,6 +133,12 @@ npm run start # (coming soon) run with ts-node locally
 
 ---
 
+## 🤖 Try the Bot
+
+👉 [Open the Telegram bot](https://t.me/YourBotUsername)
+
+---
+
 ## 🤝 Contributing
 
 Pull requests are welcome! If you find a bug or have an idea, open an issue.

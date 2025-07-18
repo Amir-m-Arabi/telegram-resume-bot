@@ -135,7 +135,7 @@ npm run start # (coming soon) run with ts-node locally
 
 ## 🤖 Try the Bot
 
-👉 [Open the Telegram bot](https://t.me/YourBotUsername)
+👉 [Open the Telegram bot](https://t.me/tel_resumeBot)
 
 ---
 

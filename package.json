@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "@grammyjs/storage-supabase": "^2.5.0",
+    "dotenv": "^17.2.0",
+    "grammy": "^1.37.0",
+    "node": "^20.19.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "wrangler": "^4.25.0"
+  }
+}

@@ -1,0 +1,7 @@
+name = "telegram-resume-bot"
+compatibility_date = "2025-07-17"
+main = "src/cloudflare/worker.ts"
+
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "your-kv-namespace-id-here"

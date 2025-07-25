@@ -1,9 +1,12 @@
-import { Context, InlineKeyboard, InputFile } from "grammy";
+import { InlineKeyboard, InputFile } from "grammy";
+import { BotContext } from "../../shared/session/session";
 
-export async function resumeHandler(ctx: Context) {
+export async function resumeHandler(ctx: BotContext) {
   const keyboard = new InlineKeyboard()
     .text("🇮🇷 رزومه فارسی", "resume_fa")
-    .text("🇬🇧 English Resume", "resume_en");
+    .text("🇬🇧 English Resume", "resume_en")
+    .row()
+    .text("بازگشت به لیست", "back_btn");
 
   await ctx.editMessageText("کدوم نسخه از رزومه رو می‌خوای دانلود کنی؟", {
     reply_markup: keyboard,
@@ -12,12 +15,12 @@ export async function resumeHandler(ctx: Context) {
 
 const FILE_IDS = {
   resume_fa:
-    "BQACAgQAAxkBAANKaHoe3nA8PU-aiQno-U849LMhcFgAAlccAAKII9BTDB1v79Hc4Lc2BA",
+    "BQACAgQAAxkBAAOTaIOyttakuTk8KTNrpK2wDn01EiEAAvgXAAI7iCBQDxU_8Hhr_oc2BA",
   resume_en:
-    "BQACAgQAAxkBAAM9aHodp7hGQZLwrk_eWodmn-PSzWsAAukXAAKII8hT4KxgITVxw9Q2BA",
+    "BQACAgQAAxkBAAOVaIOzBtMLt3PUyIuCAhPSrLNShIcAAvwXAAI7iCBQO98jJxs9sgs2BA",
 };
 
-export async function resumeLangHandler(ctx: Context) {
+export async function resumeLangHandler(ctx: BotContext) {
   const data = ctx.callbackQuery?.data as "resume_fa" | "resume_en";
   const fileId = FILE_IDS[data];
 

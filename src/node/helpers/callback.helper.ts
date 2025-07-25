@@ -2,6 +2,7 @@ import { BotContext } from "../../shared/session/session";
 import { resumeHandler, resumeLangHandler } from "./resume.helper";
 import { projectsHandler, projectLinkHandler } from "./projects.handler";
 import { contactCommand } from "../../shared/commands/contact.command";
+import { startCommand } from "../../shared/commands/start.command";
 export async function onCallbackQuery(ctx: BotContext) {
   const data = ctx.callbackQuery?.data;
 
@@ -13,6 +14,9 @@ export async function onCallbackQuery(ctx: BotContext) {
 
     case data === "resume_fa" || data === "resume_en":
       return resumeLangHandler(ctx);
+
+    case data === "back_btn":
+      return startCommand(ctx);
 
     case data === "projects_btn":
       return projectsHandler(ctx);

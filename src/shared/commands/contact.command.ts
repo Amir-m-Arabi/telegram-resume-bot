@@ -5,7 +5,5 @@ export async function contactCommand(ctx: BotContext) {
   ctx.session.name = undefined;
   ctx.session.email = undefined;
 
-  console.log("bbb", ctx.session.step);
-
   await ctx.reply("👤 لطفاً نام خود را وارد کنید:");
 }

@@ -10,6 +10,7 @@ import { cloudflareKVStorage } from "../shared/session/kv-session-adapter";
 
 export interface Env {
   BOT_TOKEN: string;
+  ADMIN_ID: string;
   SESSIONS: KVNamespace;
 }
 
@@ -27,9 +28,15 @@ export default {
         storage: cloudflareKVStorage(env.SESSIONS),
       })
     );
+
+    function createContactHandler(adminId: string) {
+      return async (ctx: BotContext) => {
+        await contactFormHandler(ctx, adminId);
+      };
+    }
     bot.command("start", startCommand);
     bot.on("callback_query:data", onCallbackQuery);
-    bot.on("message:text", contactFormHandler);
+    bot.on("message:text", createContactHandler(env.ADMIN_ID));
 
     await bot.init();
 

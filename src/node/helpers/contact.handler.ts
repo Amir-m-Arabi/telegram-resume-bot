@@ -1,9 +1,7 @@
 import { BotContext } from "../../shared/session/session";
 
-export async function contactFormHandler(ctx: BotContext) {
+export async function contactFormHandler(ctx: BotContext, adminId: string) {
   const text = ctx.message?.text;
-
-  console.log("aaa",ctx.session.step);
 
   if (!text) return;
 
@@ -19,6 +17,11 @@ export async function contactFormHandler(ctx: BotContext) {
       ctx.session.step = "idle";
       await ctx.reply(
         `✅ اطلاعات ثبت شد:\n\n👤 نام: ${ctx.session.name}\n📧 ایمیل: ${ctx.session.email}`
+      );
+
+      await ctx.api.sendMessage(
+        adminId,
+        `📥 فرم جدید دریافت شد:\n\n👤 نام: ${ctx.session.name}\n📧 ایمیل: ${ctx.session.email}`
       );
       break;
   }

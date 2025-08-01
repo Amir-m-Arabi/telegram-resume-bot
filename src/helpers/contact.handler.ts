@@ -1,4 +1,4 @@
-import { BotContext } from "../../shared/session/session";
+import { BotContext } from "../session/session";
 
 export async function contactFormHandler(ctx: BotContext, adminId: string) {
   const text = ctx.message?.text;

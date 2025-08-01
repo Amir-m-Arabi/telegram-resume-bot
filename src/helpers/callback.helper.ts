@@ -1,8 +1,8 @@
-import { BotContext } from "../../shared/session/session";
+import { BotContext } from "../session/session";
 import { resumeHandler, resumeLangHandler } from "./resume.helper";
 import { projectsHandler, projectLinkHandler } from "./projects.handler";
-import { contactCommand } from "../../shared/commands/contact.command";
-import { startCommand } from "../../shared/commands/start.command";
+import { contactCommand } from "../commands/contact.command";
+import { startCommand } from "../commands/start.command";
 export async function onCallbackQuery(ctx: BotContext) {
   const data = ctx.callbackQuery?.data;
 

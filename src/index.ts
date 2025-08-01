@@ -1,12 +1,12 @@
 import { Bot } from "grammy";
 import { session } from "grammy";
 import { Update } from "grammy/types";
-import { BotContext, initialSession } from "../session/session";
+import { BotContext, initialSession } from "./session/session";
 
-import { startCommand } from "../commands/start.command";
-import { onCallbackQuery } from "../helpers/callback.helper";
-import { contactFormHandler } from "../helpers/contact.handler";
-import { cloudflareKVStorage } from "../session/kv-session-adapter";
+import { startCommand } from "./commands/start.command";
+import { onCallbackQuery } from "./helpers/callback.helper";
+import { contactFormHandler } from "./helpers/contact.handler";
+import { cloudflareKVStorage } from "./session/kv-session-adapter";
 
 export interface Env {
   BOT_TOKEN: string;

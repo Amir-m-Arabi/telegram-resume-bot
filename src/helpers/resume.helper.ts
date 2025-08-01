@@ -1,5 +1,5 @@
 import { InlineKeyboard, InputFile } from "grammy";
-import { BotContext } from "../../shared/session/session";
+import { BotContext } from "../session/session";
 
 export async function resumeHandler(ctx: BotContext) {
   const keyboard = new InlineKeyboard()

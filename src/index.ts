@@ -2,16 +2,17 @@ import { Bot } from "grammy";
 import { session } from "grammy";
 import { Update } from "grammy/types";
 import { BotContext, initialSession } from "./session/session";
-
+import { prismaMiddleware } from "./middleware/prismaMiddle";
 import { startCommand } from "./commands/start.command";
 import { onCallbackQuery } from "./helpers/callback.helper";
-import { contactFormHandler } from "./helpers/contact.handler";
+import { handleRegisterMessages } from "./controller/freelancer.controller";
 import { cloudflareKVStorage } from "./session/kv-session-adapter";
 
 export interface Env {
   BOT_TOKEN: string;
   ADMIN_ID: string;
   SESSIONS: KVNamespace;
+  DB: D1Database;
 }
 
 export default {
@@ -29,20 +30,29 @@ export default {
       })
     );
 
-    function createContactHandler(adminId: string) {
-      return async (ctx: BotContext) => {
-        await contactFormHandler(ctx, adminId);
-      };
-    }
+    bot.use(async (ctx: any, next: any) => {
+      ctx.env = env;
+      await prismaMiddleware(ctx, next);
+    });
+
     bot.command("start", startCommand);
     bot.on("callback_query:data", onCallbackQuery);
-    bot.on("message:text", createContactHandler(env.ADMIN_ID));
+    bot.on("message:text", handleRegisterMessages);
+
+    bot.command("resetme", async (ctx) => {
+      ctx.session = initialSession(); // بازنشانی به حالت اولیه
+      await ctx.reply("Session شما ریست شد!");
+    });
 
     await bot.init();
 
-    const update = (await request.json()) as Update;
-    await bot.handleUpdate(update);
-
-    return new Response("OK");
+    try {
+      const update = (await request.json()) as Update;
+      await bot.handleUpdate(update);
+      return new Response("OK");
+    } catch (error) {
+      console.error("Error in webhook:", error);
+      return new Response("Error processing webhook", { status: 500 });
+    }
   },
 };

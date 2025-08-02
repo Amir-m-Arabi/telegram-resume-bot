@@ -1,16 +1,40 @@
-import { SessionFlavor } from "grammy";
-import { Context } from "grammy";
+import { PrismaClient } from "@prisma/client";
+import { SessionFlavor, Context } from "grammy";
+
+export type RegisterStep =
+  | "idle"
+  | "username"
+  | "email"
+  | "phoneNumber"
+  | "gitHubUrl"
+  | "linkdinUrl";
 
 export interface ContactForm {
-  step: "idle" | "awaiting_name" | "awaiting_email";
-  name?: string;
-  email?: string;
+  registerStep: RegisterStep;
+  linkStatus: string;
+  contentStatus: boolean;
+  tempUser: {
+    chatId: string;
+    username?: string;
+    email?: string;
+    phoneNumber?: string;
+    gitHubUrl?: string | null;
+    linkdinUrl?: string | null;
+  } | null;
 }
 
-export type BotContext = Context & SessionFlavor<ContactForm>;
+export interface CustomContext {
+  env: { DB: any };
+  prisma: PrismaClient;
+}
+
+export type BotContext = Context & SessionFlavor<ContactForm> & CustomContext;
 
 export function initialSession(): ContactForm {
   return {
-    step: "idle",
+    contentStatus: true,
+    linkStatus: "github",
+    registerStep: "idle",
+    tempUser: null,
   };
 }

@@ -26,7 +26,6 @@ export async function onCallbackQuery(ctx: BotContext) {
       return cancelRegisterHandler(ctx);
 
     case data === "next_btn":
-      console.log("next");
       return userLinksHandler(ctx);
 
     case data === "back_btn":

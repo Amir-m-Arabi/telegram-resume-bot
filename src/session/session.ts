@@ -12,7 +12,6 @@ export type RegisterStep =
 export interface ContactForm {
   registerStep: RegisterStep;
   linkStatus: string;
-  contentStatus: boolean;
   tempUser: {
     chatId: string;
     username?: string;
@@ -32,7 +31,6 @@ export type BotContext = Context & SessionFlavor<ContactForm> & CustomContext;
 
 export function initialSession(): ContactForm {
   return {
-    contentStatus: true,
     linkStatus: "github",
     registerStep: "idle",
     tempUser: null,

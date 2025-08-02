@@ -2,6 +2,14 @@ import { InlineKeyboard } from "grammy";
 import { BotContext } from "../session/session";
 import { PrismaClient } from "@prisma/client";
 
+export const nextKeyboard = new InlineKeyboard()
+  .text("بعدی", "next_btn")
+  .text("لغو ثبت نام", "canselRegister_btn");
+
+export const canselKeyboard = new InlineKeyboard().text(
+  "لغو ثبت نام",
+  "canselRegister_btn"
+);
 export async function freelancerHandler(ctx: BotContext) {
   const chatId = ctx.from?.id.toString();
   if (!chatId) {
@@ -72,6 +80,52 @@ export async function freelancerHandler(ctx: BotContext) {
   await ctx.answerCallbackQuery();
 }
 
+async function saveUserAndRespond(ctx: BotContext) {
+  if (
+    !ctx.session.tempUser ||
+    !ctx.session.tempUser.username ||
+    !ctx.session.tempUser.email ||
+    !ctx.session.tempUser.phoneNumber
+  ) {
+    await ctx.reply("خطا: اطلاعات ناقص است. لطفاً دوباره ثبت‌نام کنید.", {
+      reply_markup: canselKeyboard,
+    });
+    ctx.session.registerStep = "idle";
+    ctx.session.tempUser = null;
+    return false;
+  }
+
+  try {
+    await ctx.prisma.user.create({
+      data: {
+        chatId: ctx.session.tempUser.chatId,
+        username: ctx.session.tempUser.username,
+        email: ctx.session.tempUser.email,
+        phoneNumber: ctx.session.tempUser.phoneNumber,
+        gitHubUrl: ctx.session.tempUser.gitHubUrl,
+        linkdinUrl: ctx.session.tempUser.linkdinUrl,
+      },
+    });
+
+    ctx.session.registerStep = "idle";
+    ctx.session.tempUser = null;
+
+    const keyboard = new InlineKeyboard()
+      .text("تکمیل پروفایل", "complete_profile")
+      .text("بازگشت", "back_btn");
+
+    await ctx.reply(
+      "ثبت‌نام با موفقیت انجام شد! 🎉 حالا می‌تونید پروفایلتون رو تکمیل کنید:",
+      { reply_markup: keyboard }
+    );
+    return true;
+  } catch (error) {
+    console.error("Error saving user:", error);
+    await ctx.reply("خطایی رخ داد! لطفاً دوباره تلاش کنید.");
+    return false;
+  }
+}
+
 export async function startRegisterHandler(ctx: BotContext) {
   if (!ctx.from?.id) {
     await ctx.reply("خطا: نمی‌تونم اطلاعات کاربر رو پیدا کنم.");
@@ -108,15 +162,6 @@ export async function handleRegisterMessages(ctx: BotContext) {
 
   const prisma = ctx.prisma;
   const text = ctx.message?.text?.trim();
-
-  const canselKeyboard = new InlineKeyboard().text(
-    "لغو ثبت نام",
-    "canselRegister_btn"
-  );
-
-  const nextKeyboard = new InlineKeyboard()
-    .text("بعدی", "next_btn")
-    .text("لغو ثبت نام", "canselRegister_btn");
 
   if (!text) {
     await ctx.reply("لطفاً یک متن معتبر وارد کنید.", {
@@ -174,72 +219,30 @@ export async function handleRegisterMessages(ctx: BotContext) {
       break;
 
     case "gitHubUrl":
-      ctx.session.tempUser.gitHubUrl =
-        ctx.session.contentStatus === false ||
-        !text.startsWith("https://github.com/")
-          ? null
-          : text;
+      ctx.session.tempUser.gitHubUrl = !text.startsWith("https://github.com")
+        ? null
+        : text;
       ctx.session.registerStep = "linkdinUrl";
-      ctx.session.contentStatus === true;
       await ctx.reply("لطفاً لینک LinkedIn خودتون رو وارد کنید :", {
         reply_markup: nextKeyboard,
       });
       break;
 
     case "linkdinUrl":
-      ctx.session.tempUser!.linkdinUrl =
-        ctx.session.contentStatus === false ||
-        !text.startsWith("https://www.linkedin.com")
-          ? null
-          : text;
+      ctx.session.tempUser!.linkdinUrl = !text.startsWith(
+        "https://www.linkedin.com"
+      )
+        ? null
+        : text;
 
-      if (
-        !ctx.session.tempUser ||
-        !ctx.session.tempUser.username ||
-        !ctx.session.tempUser.email ||
-        !ctx.session.tempUser.phoneNumber
-      ) {
-        await ctx.reply("خطا: اطلاعات ناقص است. لطفاً دوباره ثبت‌نام کنید.", {
-          reply_markup: canselKeyboard,
-        });
-        ctx.session.registerStep = "idle";
-        ctx.session.tempUser = null;
-        return;
-      }
-
-      try {
-        await ctx.prisma.user.create({
-          data: {
-            chatId: ctx.session.tempUser.chatId,
-            username: ctx.session.tempUser.username,
-            email: ctx.session.tempUser.email,
-            phoneNumber: ctx.session.tempUser.phoneNumber,
-            gitHubUrl: ctx.session.tempUser.gitHubUrl,
-            linkdinUrl: ctx.session.tempUser.linkdinUrl,
-          },
-        });
-
-        ctx.session.registerStep = "idle";
-        ctx.session.tempUser = null;
-
-        const keyboard = new InlineKeyboard()
-          .text("تکمیل پروفایل", "complete_profile")
-          .text("بازگشت", "back_btn");
-
-        await ctx.reply(
-          "ثبت‌نام با موفقیت انجام شد! 🎉 حالا می‌تونید پروفایلتون رو تکمیل کنید:",
-          { reply_markup: keyboard }
-        );
-      } catch (error) {
-        console.error("Error saving user:", error);
-        await ctx.reply("خطایی رخ داد! لطفاً دوباره تلاش کنید.");
-      }
+      await saveUserAndRespond(ctx);
       break;
   }
 }
 
 export async function cancelRegisterHandler(ctx: BotContext) {
   ctx.session.registerStep = "idle";
+  ctx.session.linkStatus = "github";
   ctx.session.tempUser = null;
   await ctx.reply("ثبت‌نام لغو شد.");
   await ctx.answerCallbackQuery();
@@ -247,20 +250,24 @@ export async function cancelRegisterHandler(ctx: BotContext) {
 }
 
 export async function userLinksHandler(ctx: BotContext) {
-  console.log(ctx.session);
+  if (!ctx.session.tempUser) return;
   const status = ctx.session.linkStatus;
-  console.log(status);
   switch (status) {
     case "github":
-      ctx.session.contentStatus = false;
+      ctx.session.tempUser.gitHubUrl = null;
       ctx.session.linkStatus = "linkdin";
-      return;
+      ctx.session.registerStep = "linkdinUrl";
+      await ctx.reply("لطفاً لینک LinkedIn خودتون رو وارد کنید :", {
+        reply_markup: nextKeyboard,
+      });
+      break;
     case "linkdin":
-      ctx.session.contentStatus = false;
+      ctx.session.tempUser.linkdinUrl = null;
       ctx.session.linkStatus = "";
-      return;
+
+      await saveUserAndRespond(ctx);
+      break;
     default:
-      console.log("true");
       await ctx.answerCallbackQuery("دکمه نامعتبر بود.");
   }
 }
